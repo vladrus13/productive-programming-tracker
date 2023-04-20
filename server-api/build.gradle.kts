@@ -1,5 +1,9 @@
+val ktorVersion: String by project
+val exposedVersion: String by project
+
 plugins {
     kotlin("jvm") version "1.8.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
     application
 }
 
@@ -11,7 +15,17 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("mysql:mysql-connector-java:8.0.32")
+    implementation("ch.qos.logback:logback-classic:1.4.6")
     testImplementation(kotlin("test"))
+
 }
 
 tasks.test {
