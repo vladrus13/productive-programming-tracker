@@ -1,17 +1,18 @@
 package dao
 
+import kotlinx.coroutines.Dispatchers
 import model.Events
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import java.util.Properties
 
 object DatabaseFactory {
     fun init() {
         val properties = Properties()
         properties.load(
-            File("server-api/src/main/resources/database.properties").bufferedReader()
+            DatabaseFactory.javaClass.getResourceAsStream("/database.properties")
         ) //throws IOExc
         val driverClassName = properties.getProperty("driver-class-name")
         val jdbcURL = properties.getProperty("url")!!
@@ -22,4 +23,7 @@ object DatabaseFactory {
             SchemaUtils.create(Events)
         }
     }
+
+    suspend fun <T> dbQuery(block: suspend () -> T): T =
+        newSuspendedTransaction(Dispatchers.IO) { block() }
 }
