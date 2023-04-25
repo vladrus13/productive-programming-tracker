@@ -7,7 +7,7 @@ plugins {
     application
 }
 
-group = "org.example"
+group = "ru.productive"
 version = "1.0-SNAPSHOT"
 
 repositories {
