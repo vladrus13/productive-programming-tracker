@@ -1,7 +1,23 @@
-fun main(args: Array<String>) {
-  println("Hello World!")
+import dao.DatabaseFactory
+import dao.bindDao
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import routing.configureRouting
+import model.configureSerialization
+import org.kodein.di.ktor.di
 
-  // Try adding program arguments via Run/Debug configuration.
-  // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-  println("Program arguments: ${args.joinToString()}")
+fun main() {
+    embeddedServer(Netty, port = 8080, module = Application::module).start(true)
+}
+
+fun Application.module() {
+    DatabaseFactory.init()
+
+    di {
+        bindDao()
+    }
+
+    configureRouting()
+    configureSerialization()
 }
