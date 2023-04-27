@@ -22,6 +22,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:7.19.1")
     implementation("mysql:mysql-connector-java:8.0.32")
     implementation("ch.qos.logback:logback-classic:1.4.6")
     testImplementation(kotlin("test"))

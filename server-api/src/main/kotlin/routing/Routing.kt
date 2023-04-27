@@ -1,21 +1,27 @@
 package routing
 
+import dao.EventDAO
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import model.Event
+import org.kodein.di.instance
+import org.kodein.di.ktor.closestDI
+
 
 fun Application.configureRouting() {
     routing {
         route("/api/event") {
+            val eventDAO by closestDI().instance<EventDAO>()
+
             get("{id?}") {
                 val id = call.parameters["id"]?.toLong() ?: return@get call.respondText(
                     "Missing id",
                     status = HttpStatusCode.BadRequest
                 )
-                val event = Event.get(id) ?: return@get call.respondText(
+                val event = eventDAO.findById(id) ?: return@get call.respondText(
                     "No event with id $id",
                     status = HttpStatusCode.NotFound
                 )
@@ -24,7 +30,7 @@ fun Application.configureRouting() {
 
             post {
                 val event = call.receive<Event>()
-                val id = Event.add(event) ?: return@post call.respondText(
+                val id = eventDAO.upsert(event) ?: return@post call.respondText(
                     "Nonexistent id ${event.id}",
                     status = HttpStatusCode.BadRequest
                 )
@@ -36,7 +42,7 @@ fun Application.configureRouting() {
                     "Missing id",
                     status = HttpStatusCode.BadRequest
                 )
-                if (Event.delete(id) > 0) {
+                if (eventDAO.delete(id)) {
                     call.response.status(HttpStatusCode.Accepted)
                 } else {
                     return@delete call.respondText(
