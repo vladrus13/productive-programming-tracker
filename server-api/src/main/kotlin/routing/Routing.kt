@@ -7,6 +7,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import model.Event
+import model.TextResponse
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -17,30 +18,30 @@ fun Application.configureRouting() {
             val eventDAO by closestDI().instance<EventDAO>()
 
             get("{id?}") {
-                val id = call.parameters["id"]?.toLong() ?: return@get call.respondText(
+                val id = call.parameters["id"]?.toLong() ?: return@get call.respondJSONText(
                     "Missing id",
-                    status = HttpStatusCode.BadRequest
+                    HttpStatusCode.BadRequest
                 )
-                val event = eventDAO.findById(id) ?: return@get call.respondText(
+                val event = eventDAO.findById(id) ?: return@get call.respondJSONText(
                     "No event with id $id",
-                    status = HttpStatusCode.NotFound
+                    HttpStatusCode.NotFound
                 )
                 call.respond(event)
             }
 
             post {
                 val event = call.receive<Event>()
-                val id = eventDAO.upsert(event) ?: return@post call.respondText(
+                val id = eventDAO.upsert(event) ?: return@post call.respondJSONText(
                     "Nonexistent id ${event.id}",
-                    status = HttpStatusCode.BadRequest
+                    HttpStatusCode.BadRequest
                 )
                 call.respond(HttpStatusCode.Created, Event(id, event.title))
             }
 
             delete("{id?}") {
-                val id = call.parameters["id"]?.toLong() ?: return@delete call.respondText(
+                val id = call.parameters["id"]?.toLong() ?: return@delete call.respondJSONText(
                     "Missing id",
-                    status = HttpStatusCode.BadRequest
+                    HttpStatusCode.BadRequest
                 )
                 if (eventDAO.delete(id)) {
                     call.response.status(HttpStatusCode.Accepted)
@@ -53,4 +54,8 @@ fun Application.configureRouting() {
             }
         }
     }
+}
+
+private suspend fun ApplicationCall.respondJSONText(message: String, statusCode: HttpStatusCode) {
+    return this.respond(statusCode, TextResponse(statusCode.value, message))
 }
