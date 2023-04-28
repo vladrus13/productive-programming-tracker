@@ -1,6 +1,5 @@
-import dao.DatabaseFactory
-import dao.EventDAO
-import dao.Events
+package dao
+
 import kotlinx.coroutines.runBlocking
 import model.Event
 import org.jetbrains.exposed.sql.insert
