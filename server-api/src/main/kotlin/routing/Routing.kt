@@ -78,7 +78,7 @@ fun Application.configureRouting() {
                 val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
                 val fullName: String = parameters["fullName"] ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
 
-                val visitorId = eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.REGISTERED))
+                val visitorId = eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.R))
                 return@post call.respondJSONText("Visitor is registered with id=$visitorId", HttpStatusCode.OK)
             }
         }
