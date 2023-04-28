@@ -17,7 +17,7 @@ class EventVisitorDAO : GenericDAO<EventVisitor> {
 
     override suspend fun findById(id: Long): EventVisitor? = DatabaseFactory.dbQuery {
         EventVisitors
-            .select { Events.id eq id }
+            .select { EventVisitors.id eq id }
             .map(this::rowToEvent)
             .singleOrNull()
     }
@@ -38,6 +38,12 @@ class EventVisitorDAO : GenericDAO<EventVisitor> {
             it[visitStatus] = entity.visitStatus
         }
         if (update == 0) null else id
+    }
+
+    suspend fun findAllByEventId(eventId: Long): List<EventVisitor> = DatabaseFactory.dbQuery {
+        EventVisitors
+            .select { EventVisitors.eventId eq eventId }
+            .map(this::rowToEvent)
     }
 
 }

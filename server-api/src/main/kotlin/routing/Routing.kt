@@ -68,8 +68,9 @@ fun Application.configureRouting() {
             val eventVisitorsDAO by closestDI().instance<EventVisitorDAO>()
 
             get {
-                // TODO: list of visitors
-                return@get call.respondJSONText("Test", HttpStatusCode.OK)
+                val eventId: Long = call.parameters["eventId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val visitors = eventVisitorsDAO.findAllByEventId(eventId)
+                return@get call.respondJSONText(visitors.joinToString(",") { it.fullName }, HttpStatusCode.OK)
             }
 
             post("/add") {
