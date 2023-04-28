@@ -1,3 +1,5 @@
+val ktor_version: String by project
+
 plugins {
     kotlin("jvm") version "1.8.0"
     application
@@ -14,6 +16,9 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:6.0.7")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
 }
 
 tasks.test {

@@ -20,6 +20,7 @@ object DatabaseFactory {
         val database = Database.connect(jdbcURL, driver = driverClassName, user = username, password = password)
         transaction(database) {
             SchemaUtils.create(Events)
+            SchemaUtils.create(EventVisitors)
         }
     }
 
