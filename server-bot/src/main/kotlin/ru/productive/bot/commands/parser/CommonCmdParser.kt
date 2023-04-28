@@ -1,16 +1,18 @@
 package ru.productive.bot.commands.parser
 
+const val ARGUMENT_SEPARATOR = " "
+
 fun parseNotNullMessage(text: String?): Result<String> {
-    if (text == null) {
-        return Result.failure(NullPointerException("Missing arguments"))
+    return if (text == null) {
+        Result.failure(NullPointerException("Missing arguments"))
     } else {
-        return Result.success(text)
+        Result.success(text)
     }
 }
 
 fun parseArgumentsWithoutCmd(text: String?): Result<List<String>> {
     return parseNotNullMessage(text).mapCatching { args ->
-        val arguments = args.split(" ")
+        val arguments = args.split(ARGUMENT_SEPARATOR)
         if (arguments.size < 2) {
             throw IllegalArgumentException("Few arguments")
         }

@@ -16,7 +16,7 @@ fun parseAddEventVisitorArguments(text: String?): Result<EventVisitorsArguments>
         if (rawArgs.size < 2) {
             throw IllegalArgumentException("Missing full name")
         }
-        val fullName = rawArgs.drop(1).joinToString(" ")
+        val fullName = rawArgs.drop(1).joinToString(ARGUMENT_SEPARATOR)
 
         return@mapCatching EventVisitorsArguments(eventId, fullName)
     }
