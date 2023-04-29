@@ -6,4 +6,5 @@ import org.kodein.di.singleton
 
 fun DI.MainBuilder.bindDao() {
     bind<EventDAO>() with singleton { EventDAO() }
+    bind<EventVisitorDAO>() with singleton { EventVisitorDAO() }
 }

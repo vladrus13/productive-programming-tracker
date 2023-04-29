@@ -26,6 +26,7 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.32")
     implementation("ch.qos.logback:logback-classic:1.4.6")
     testImplementation(kotlin("test"))
+    testImplementation("com.h2database:h2:2.1.214")
 
 }
 

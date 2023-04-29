@@ -1,12 +1,14 @@
 package routing
 
 import dao.EventDAO
+import dao.EventVisitorDAO
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import model.Event
+import model.EventVisitor
 import model.TextResponse
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
@@ -38,6 +40,14 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.Created, Event(id, event.title))
             }
 
+            post("/add") {
+                val title = call.parameters["title"] ?: return@post call.respondJSONText(
+                    "Missing title", HttpStatusCode.BadRequest)
+
+                val eventId = eventDAO.upsert(Event(null, title))
+                return@post call.respondJSONText("Event is created with id $eventId", HttpStatusCode.OK)
+            }
+
             delete("{id?}") {
                 val id = call.parameters["id"]?.toLong() ?: return@delete call.respondJSONText(
                     "Missing id",
@@ -51,6 +61,26 @@ fun Application.configureRouting() {
                         status = HttpStatusCode.NotFound
                     )
                 }
+            }
+        }
+        route("/api/event-visitors") {
+
+            val eventVisitorsDAO by closestDI().instance<EventVisitorDAO>()
+
+            get {
+                val eventId: Long = call.parameters["eventId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val visitors = eventVisitorsDAO.findAllByEventId(eventId)
+                return@get call.respondJSONText(visitors.joinToString(",") { it.fullName }, HttpStatusCode.OK)
+            }
+
+            post("/add") {
+                val parameters = call.parameters
+
+                val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val fullName: String = parameters["fullName"] ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+
+                val visitorId = eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.R))
+                return@post call.respondJSONText("Visitor is registered with id=$visitorId", HttpStatusCode.OK)
             }
         }
     }
