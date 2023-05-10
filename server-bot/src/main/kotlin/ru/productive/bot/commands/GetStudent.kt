@@ -5,8 +5,12 @@ import com.github.kotlintelegrambot.dispatcher.message
 import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.extensions.filters.Filter
+import kotlinx.coroutines.runBlocking
+import ru.productive.bot.botLogger
 import ru.productive.database.MockDatabase
 import ru.productive.utils.LevenshteinDistance
+import ru.productive.utils.LoggerUtils.Companion.addAnswer
+import ru.productive.utils.LoggerUtils.Companion.addUserMessage
 
 class GetStudentFilter : Filter {
   override fun Message.predicate(): Boolean = text?.startsWith("get ") == true
@@ -15,14 +19,18 @@ class GetStudentFilter : Filter {
 
 fun Dispatcher.getStudent() {
   message(GetStudentFilter()) {
-    val student = this.message.text?.split(" ")?.drop(1) ?: return@message
-    val text = MockDatabase().getUsers()
-      .sortedBy { LevenshteinDistance.calculate(it.split(" "), student) }
-      .take(5)
-      .joinToString(separator = "\n")
-    bot.sendMessage(
-      ChatId.fromId(this.message.chat.id),
-      text = text
-    )
+    runBlocking {
+      botLogger.addUserMessage("getStudent", message)
+      val student = message.text?.split(" ")?.drop(1) ?: return@runBlocking
+      val text = MockDatabase().getUsers()
+        .sortedBy { LevenshteinDistance.calculate(it.split(" "), student) }
+        .take(5)
+        .joinToString(separator = "\n")
+      botLogger.addAnswer("addEvent", message, text)
+      bot.sendMessage(
+        ChatId.fromId(this@message.message.chat.id),
+        text = text
+      )
+    }
   }
 }

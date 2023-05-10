@@ -5,6 +5,7 @@ import com.github.kotlintelegrambot.dispatch
 import ru.productive.api.client.ApiClient
 import ru.productive.bot.commands.*
 import ru.productive.config.BotConfig
+import java.util.logging.Logger
 
 val Bot = bot {
   token = BotConfig.TOKEN
@@ -20,3 +21,5 @@ val Bot = bot {
     getStudent()
   }
 }
+
+val botLogger = Logger.getLogger(Bot.javaClass.name)
