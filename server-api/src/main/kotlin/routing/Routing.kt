@@ -20,6 +20,8 @@ fun Application.configureRouting() {
             val eventDAO by closestDI().instance<EventDAO>()
 
             get("{id?}") {
+                call.log()
+
                 val id = call.parameters["id"]?.toLong() ?: return@get call.respondJSONText(
                     "Missing id",
                     HttpStatusCode.BadRequest
@@ -32,6 +34,8 @@ fun Application.configureRouting() {
             }
 
             post {
+                call.log()
+
                 val event = call.receive<Event>()
                 val id = eventDAO.upsert(event) ?: return@post call.respondJSONText(
                     "Nonexistent id ${event.id}",
@@ -41,6 +45,8 @@ fun Application.configureRouting() {
             }
 
             post("/add") {
+                call.log()
+
                 val title = call.parameters["title"] ?: return@post call.respondJSONText(
                     "Missing title", HttpStatusCode.BadRequest)
 
@@ -49,6 +55,8 @@ fun Application.configureRouting() {
             }
 
             delete("{id?}") {
+                call.log()
+
                 val id = call.parameters["id"]?.toLong() ?: return@delete call.respondJSONText(
                     "Missing id",
                     HttpStatusCode.BadRequest
@@ -68,12 +76,16 @@ fun Application.configureRouting() {
             val eventVisitorsDAO by closestDI().instance<EventVisitorDAO>()
 
             get {
+                call.log()
+
                 val eventId: Long = call.parameters["eventId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
                 val visitors = eventVisitorsDAO.findAllByEventId(eventId)
                 return@get call.respondJSONText(visitors.joinToString(",") { it.fullName }, HttpStatusCode.OK)
             }
 
             post("/add") {
+                call.log()
+
                 val parameters = call.parameters
 
                 val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
@@ -88,4 +100,8 @@ fun Application.configureRouting() {
 
 private suspend fun ApplicationCall.respondJSONText(message: String, statusCode: HttpStatusCode) {
     return this.respond(statusCode, TextResponse(statusCode.value, message))
+}
+
+private fun ApplicationCall.log() {
+    application.environment.log.debug("[${this.request.httpMethod.value}] ${this.request.uri}")
 }
