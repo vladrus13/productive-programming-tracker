@@ -1,7 +1,7 @@
 package dao
 
 import kotlinx.coroutines.runBlocking
-import model.Event
+import model.entity.Event
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

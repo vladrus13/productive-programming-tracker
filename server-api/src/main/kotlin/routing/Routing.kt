@@ -7,8 +7,8 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import model.Event
-import model.EventVisitor
+import model.entity.Event
+import model.entity.EventVisitor
 import model.TextResponse
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
