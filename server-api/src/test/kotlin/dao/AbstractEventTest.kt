@@ -1,5 +1,6 @@
 package dao
 
+import dao.impl.Events
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insertAndGetId

@@ -1,5 +1,6 @@
-package dao
+package dao.impl
 
+import dao.DatabaseFactory
 import model.entity.EventVisitor
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.*

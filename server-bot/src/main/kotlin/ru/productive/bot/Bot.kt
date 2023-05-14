@@ -15,6 +15,7 @@ val Bot = bot {
   dispatch {
     ping()
     addEvent(apiClient)
+    addEventAdministrator(apiClient)
     getEventVisitors(apiClient)
     addEventVisitor(apiClient)
     levenshteinDistance()

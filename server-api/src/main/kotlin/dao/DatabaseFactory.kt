@@ -1,5 +1,8 @@
 package dao
 
+import dao.impl.EventAdministrators
+import dao.impl.EventVisitors
+import dao.impl.Events
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -21,6 +24,7 @@ object DatabaseFactory {
         transaction(database) {
             SchemaUtils.create(Events)
             SchemaUtils.create(EventVisitors)
+            SchemaUtils.create(EventAdministrators)
         }
     }
 

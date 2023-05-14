@@ -1,5 +1,8 @@
 package dao
 
+import dao.impl.EventVisitorDAO
+import dao.impl.EventVisitors
+import dao.impl.Events
 import kotlinx.coroutines.runBlocking
 import model.entity.EventVisitor
 import model.entity.EventVisitor.VisitStatus

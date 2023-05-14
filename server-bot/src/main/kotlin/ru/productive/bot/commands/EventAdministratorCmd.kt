@@ -8,17 +8,18 @@ import kotlinx.coroutines.runBlocking
 import ru.productive.api.client.ApiClient
 import ru.productive.bot.botLogger
 import ru.productive.bot.commands.parser.parseAddEventTitle
+import ru.productive.bot.commands.parser.parseEventAdministratorArguments
 import ru.productive.utils.LoggerUtils.Companion.addAnswer
 import ru.productive.utils.LoggerUtils.Companion.addFailAnswer
 import ru.productive.utils.LoggerUtils.Companion.addUserMessage
 
-fun Dispatcher.addEvent(apiClient: ApiClient) {
-    command("addEvent") {
+fun Dispatcher.addEventAdministrator(apiClient: ApiClient) {
+    command("addEventAdministrator") {
         runBlocking {
-            botLogger.addUserMessage("addEvent", message)
-            parseAddEventTitle(message.text)
-                .onSuccess { title ->
-                    val response: HttpResponse = apiClient.addEvent(title, message.chat.username!!)
+            botLogger.addUserMessage("addEventAdministrator", message)
+            parseEventAdministratorArguments(message)
+                .onSuccess { (eventId, userName) ->
+                    val response: HttpResponse = apiClient.addEventAdministrator(eventId, userName)
                     val textResponse = response.bodyAsText()
                     botLogger.addAnswer("addEvent", message, textResponse)
                     bot.sendMessage(ChatId.fromId(message.chat.id), text = textResponse)

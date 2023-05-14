@@ -1,6 +1,6 @@
 package model.entity
 
-import dao.EventVisitors
+import dao.impl.EventVisitors
 import kotlinx.serialization.Serializable
 import model.ConstructableFromRow
 import model.ConvertableToDBBuilder

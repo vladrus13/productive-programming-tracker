@@ -1,5 +1,7 @@
-package dao
+package dao.impl
 
+import dao.DatabaseFactory
+import dao.GenericDAO
 import model.ConstructableFromRow
 import model.LongIdEntity
 import model.ConvertableToDBBuilder
@@ -20,7 +22,7 @@ abstract class AbstractGenericDAO<
     Entity : LongIdEntity,
     Entity : ConvertableToDBBuilder {
 
-    override suspend fun findById(id: Long): Entity? = DatabaseFactory.dbQuery{
+    override suspend fun findById(id: Long): Entity? = DatabaseFactory.dbQuery {
         table
             .select { table.id eq id }
             .map { resultRow -> dbEntityCompanion.fromResultRow(resultRow) }

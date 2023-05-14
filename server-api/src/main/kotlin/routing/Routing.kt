@@ -1,7 +1,9 @@
 package routing
 
-import dao.EventDAO
-import dao.EventVisitorDAO
+import dao.DatabaseFactory
+import dao.impl.EventAdministratorDAO
+import dao.impl.EventDAO
+import dao.impl.EventVisitorDAO
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -10,14 +12,19 @@ import io.ktor.server.routing.*
 import model.entity.Event
 import model.entity.EventVisitor
 import model.TextResponse
+import model.entity.EventAdministrator
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
 
 fun Application.configureRouting() {
     routing {
+        val eventDAO by closestDI().instance<EventDAO>()
+        val eventAdministratorsDAO by closestDI().instance<EventAdministratorDAO>()
+        val eventVisitorsDAO by closestDI().instance<EventVisitorDAO>()
+
         route("/api/event") {
-            val eventDAO by closestDI().instance<EventDAO>()
 
             get("{id?}") {
                 call.log()
@@ -49,8 +56,11 @@ fun Application.configureRouting() {
 
                 val title = call.parameters["title"] ?: return@post call.respondJSONText(
                     "Missing title", HttpStatusCode.BadRequest)
+                val ownerUserName = call.parameters["userName"] ?: return@post call.respondJSONText(
+                    "Missing owner", HttpStatusCode.BadRequest)
 
-                val eventId = eventDAO.upsert(Event(null, title))
+                val eventId = eventDAO.upsert(Event(null, title))!!
+                eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, ownerUserName, EventAdministrator.Role.O))!!
                 return@post call.respondJSONText("Event is created with id $eventId", HttpStatusCode.OK)
             }
 
@@ -71,9 +81,24 @@ fun Application.configureRouting() {
                 }
             }
         }
-        route("/api/event-visitors") {
 
-            val eventVisitorsDAO by closestDI().instance<EventVisitorDAO>()
+        route("/api/event-administrators") {
+
+            post("/add") {
+                call.log()
+
+                val parameters = call.parameters
+
+                val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val userName: String = parameters["userName"] ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+
+                val adminId = eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, userName, EventAdministrator.Role.A))
+                return@post call.respondJSONText("Administrator is added with id=$adminId", HttpStatusCode.OK)
+            }
+
+        }
+
+        route("/api/event-visitors") {
 
             get {
                 call.log()

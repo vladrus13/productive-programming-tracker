@@ -1,5 +1,7 @@
 package dao
 
+import dao.impl.EventDAO
+import dao.impl.Events
 import kotlinx.coroutines.runBlocking
 import model.entity.Event
 import org.junit.jupiter.api.Assertions.*

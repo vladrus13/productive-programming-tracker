@@ -1,6 +1,6 @@
 package model.entity
 
-import dao.Events
+import dao.impl.Events
 import kotlinx.serialization.Serializable
 import model.ConstructableFromRow
 import model.ConvertableToDBBuilder

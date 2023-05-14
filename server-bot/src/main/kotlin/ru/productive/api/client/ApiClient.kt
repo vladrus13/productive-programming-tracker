@@ -23,12 +23,22 @@ class ApiClient(
 
     private val addEventEndpoint = apiUri.resolve("/api/event/add").toString()
 
+    private val addEventAdministratorEndpoint = apiUri.resolve("/api/event-administrators/add").toString()
+
     private val getVisitorsEndpoint = apiUri.resolve("/api/event-visitors").toString()
     private val addVisitorEndpoint = apiUri.resolve("/api/event-visitors/add").toString()
 
-    suspend fun addEvent(title: String): HttpResponse {
+    suspend fun addEvent(title: String, userName: String): HttpResponse {
         return apiClient.post(addEventEndpoint) {
             parameter("title", title)
+            parameter("userName", userName)
+        }
+    }
+
+    suspend fun addEventAdministrator(eventId: Long, userName: String): HttpResponse {
+        return apiClient.post(addEventAdministratorEndpoint) {
+            parameter("eventId", eventId)
+            parameter("userName", userName)
         }
     }
 
