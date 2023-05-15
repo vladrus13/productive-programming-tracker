@@ -2,7 +2,10 @@ package ru.productive.bot.commands
 
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
+import com.github.kotlintelegrambot.dispatcher.text
 import com.github.kotlintelegrambot.entities.ChatId
+import com.github.kotlintelegrambot.entities.ParseMode
+import com.github.kotlintelegrambot.entities.dice.DiceEmoji
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import ru.productive.api.client.ApiClient
@@ -26,6 +29,18 @@ fun Dispatcher.addEvent(apiClient: ApiClient) {
                     botLogger.addFailAnswer("addEvent", message, e.stackTrace.toString())
                     bot.sendMessage(ChatId.fromId(message.chat.id), text = e.message ?: "Error")
                 }
+        }
+    }
+}
+
+fun Dispatcher.getEvents(apiClient: ApiClient) {
+    command("getEvents") {
+        runBlocking {
+            val events = apiClient.getEvents(message.chat.username!!)
+            val resultText = events.joinToString(separator = "\n") { event ->
+                "Event _${event.title}_ with id ${event.id};"
+            }
+            bot.sendMessage(ChatId.fromId(message.chat.id), text = resultText, parseMode = ParseMode.MARKDOWN_V2)
         }
     }
 }

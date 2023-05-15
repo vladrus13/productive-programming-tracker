@@ -8,4 +8,8 @@ class EventDAO : AbstractGenericDAO<Event, Events>(Event.DBEntity, Events)
 
 object Events : LongIdTable() {
     val title = varchar("title", 64)
+
+    init {
+        uniqueIndex(title)
+    }
 }

@@ -40,6 +40,18 @@ fun Application.configureRouting() {
                 call.respond(event)
             }
 
+            get("/all") {
+                call.log()
+
+                val userName = call.parameters["userName"] ?: return@get call.respondJSONText(
+                    "Missing owner", HttpStatusCode.BadRequest)
+
+                val eventIds = eventAdministratorsDAO.findAllByUserName(userName).map { admin -> admin.eventId }
+                val events = eventDAO.findByIds(eventIds)
+
+                call.respond(events)
+            }
+
             post {
                 call.log()
 
@@ -59,8 +71,11 @@ fun Application.configureRouting() {
                 val ownerUserName = call.parameters["userName"] ?: return@post call.respondJSONText(
                     "Missing owner", HttpStatusCode.BadRequest)
 
-                val eventId = eventDAO.upsert(Event(null, title))!!
-                eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, ownerUserName, EventAdministrator.Role.O))!!
+                val eventId = DatabaseFactory.dbQuery {
+                    val eventId = eventDAO.upsert(Event(null, title))!!
+                    eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, ownerUserName, EventAdministrator.Role.O))!!
+                    eventId
+                }
                 return@post call.respondJSONText("Event is created with id $eventId", HttpStatusCode.OK)
             }
 

@@ -29,6 +29,12 @@ abstract class AbstractGenericDAO<
             .singleOrNull()
     }
 
+    override suspend fun findByIds(ids: List<Long>): List<Entity> = DatabaseFactory.dbQuery {
+        table
+            .select { table.id inList ids }
+            .map { resultRow -> dbEntityCompanion.fromResultRow(resultRow) }
+    }
+
     override suspend fun delete(id: Long): Boolean = DatabaseFactory.dbQuery {
         table.deleteWhere { table.id eq id } > 0
     }
