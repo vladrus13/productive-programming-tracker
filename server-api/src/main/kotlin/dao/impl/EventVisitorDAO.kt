@@ -4,6 +4,7 @@ import dao.DatabaseFactory
 import model.entity.EventVisitor
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 
 class EventVisitorDAO : AbstractGenericDAO<EventVisitor, EventVisitors>(EventVisitor.DBEntity, EventVisitors) {
@@ -12,6 +13,14 @@ class EventVisitorDAO : AbstractGenericDAO<EventVisitor, EventVisitors>(EventVis
         EventVisitors
             .select { EventVisitors.eventId eq eventId }
             .map(EventVisitor::fromResultRow)
+    }
+
+    suspend fun updateVisitStatus(visitorId: Long,
+                                  visitStatus: EventVisitor.VisitStatus): Boolean = DatabaseFactory.dbQuery {
+        EventVisitors
+            .update({ EventVisitors.id eq visitorId }) {
+                it[EventVisitors.visitStatus] = visitStatus
+            } > 0
     }
 
 }

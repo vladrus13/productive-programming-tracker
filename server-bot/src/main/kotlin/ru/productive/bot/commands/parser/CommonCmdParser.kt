@@ -20,3 +20,13 @@ fun parseArgumentsWithoutCmd(text: String?): Result<List<String>> {
         return@mapCatching arguments.drop(1)
     }
 }
+
+fun parseIdArg(text: String?): Result<Long> {
+    return parseArgumentsWithoutCmd(text).mapCatching { args ->
+        if (args.size != 1) {
+            throw IllegalArgumentException("One argument is expected")
+        }
+
+        return@mapCatching args[0].toLong()
+    }
+}

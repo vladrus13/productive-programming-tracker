@@ -19,6 +19,9 @@ val Bot = bot {
     addEventAdministrator(apiClient)
     getEventVisitors(apiClient)
     addEventVisitor(apiClient)
+    markAsMissed(apiClient)
+    markAsVisited(apiClient)
+
     levenshteinDistance()
     getStudent()
   }

@@ -11,7 +11,9 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.ContentType.Application.Json
 import kotlinx.serialization.json.Json
+import model.TextResponse
 import model.entity.Event
+import model.entity.EventVisitor
 import java.net.URI
 
 class ApiClient(
@@ -40,6 +42,7 @@ class ApiClient(
 
     private val getVisitorsEndpoint = apiUri.resolve("/api/event-visitors").toString()
     private val addVisitorEndpoint = apiUri.resolve("/api/event-visitors/add").toString()
+    private val setVisitorStatus = apiUri.resolve("/api/event-visitors/set-status").toString()
 
     suspend fun addEvent(title: String, userName: String): HttpResponse {
         return apiClient.post(addEventEndpoint) {
@@ -49,9 +52,10 @@ class ApiClient(
     }
 
     suspend fun getEvents(userName: String): List<Event> {
-        return apiClient.get(getEventsEndpoint) {
+        val response = apiClient.get(getEventsEndpoint) {
             parameter("userName", userName)
-        }.body()
+        }
+        return response.body()
     }
 
     suspend fun addEventAdministrator(eventId: Long, userName: String): HttpResponse {
@@ -61,10 +65,11 @@ class ApiClient(
         }
     }
 
-    suspend fun getVisitors(eventId: Long): HttpResponse {
-        return apiClient.get(getVisitorsEndpoint) {
+    suspend fun getVisitors(eventId: Long): List<EventVisitor> {
+        val response = apiClient.get(getVisitorsEndpoint) {
             parameter("eventId", eventId)
         }
+        return response.body()
     }
 
     suspend fun addVisitor(eventId: Long, fullName: String): HttpResponse {
@@ -72,5 +77,13 @@ class ApiClient(
             parameter("eventId", eventId)
             parameter("fullName", fullName)
         }
+    }
+
+    suspend fun setVisitorStatus(visitorId: Long, visitorStatus: EventVisitor.VisitStatus): String {
+        val response = apiClient.get(setVisitorStatus) {
+            parameter("visitorId", visitorId)
+            parameter("visitorStatus", visitorStatus)
+        }
+        return response.body<TextResponse>().message
     }
 }

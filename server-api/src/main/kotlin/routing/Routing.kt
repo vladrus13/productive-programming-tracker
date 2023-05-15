@@ -120,7 +120,22 @@ fun Application.configureRouting() {
 
                 val eventId: Long = call.parameters["eventId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
                 val visitors = eventVisitorsDAO.findAllByEventId(eventId)
-                return@get call.respondJSONText(visitors.joinToString(",") { it.fullName }, HttpStatusCode.OK)
+
+                call.respond(visitors)
+            }
+
+            get("/set-status") {
+                call.log()
+
+                val visitorId: Long = call.parameters["visitorId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val rawStatus = call.parameters["visitorStatus"] ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val status = EventVisitor.VisitStatus.valueOf(rawStatus)
+
+                if (eventVisitorsDAO.updateVisitStatus(visitorId, status)) {
+                    call.respondJSONText("Update successfully", HttpStatusCode.OK)
+                } else {
+                    call.respondJSONText("No entity has been updated", HttpStatusCode.BadRequest)
+                }
             }
 
             post("/add") {
