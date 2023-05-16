@@ -64,9 +64,9 @@ fun Application.configureRouting() {
                 if (eventDAO.delete(id)) {
                     call.response.status(HttpStatusCode.Accepted)
                 } else {
-                    return@delete call.respondText(
+                    return@delete call.respondJSONText(
                         "No event with id $id",
-                        status = HttpStatusCode.NotFound
+                        HttpStatusCode.NotFound
                     )
                 }
             }
