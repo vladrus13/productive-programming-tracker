@@ -1,8 +1,11 @@
 package dao
 
+import dao.impl.EventVisitorDAO
+import dao.impl.EventVisitors
+import dao.impl.Events
 import kotlinx.coroutines.runBlocking
-import model.EventVisitor
-import model.EventVisitor.VisitStatus
+import model.entity.EventVisitor
+import model.entity.EventVisitor.VisitStatus
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.update
 import org.junit.jupiter.api.Assertions

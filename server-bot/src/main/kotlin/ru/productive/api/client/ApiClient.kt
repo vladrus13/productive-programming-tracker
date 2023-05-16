@@ -1,12 +1,20 @@
 package ru.productive.api.client
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.http.ContentType.Application.Json
+import kotlinx.serialization.json.Json
+import model.TextResponse
+import model.entity.Event
+import model.entity.EventVisitor
 import java.net.URI
-import kotlin.io.path.toPath
 
 class ApiClient(
     private val apiUri: URI,
@@ -18,24 +26,50 @@ class ApiClient(
             install(Logging) {
                 level = LogLevel.INFO
             }
+            install(ContentNegotiation) {
+                json(Json {
+                    prettyPrint = true
+                    ignoreUnknownKeys = true
+                })
+            }
         }
     )
 
     private val addEventEndpoint = apiUri.resolve("/api/event/add").toString()
+    private val getEventsEndpoint = apiUri.resolve("/api/event/all").toString()
+
+    private val addEventAdministratorEndpoint = apiUri.resolve("/api/event-administrators/add").toString()
 
     private val getVisitorsEndpoint = apiUri.resolve("/api/event-visitors").toString()
     private val addVisitorEndpoint = apiUri.resolve("/api/event-visitors/add").toString()
+    private val setVisitorStatus = apiUri.resolve("/api/event-visitors/set-status").toString()
 
-    suspend fun addEvent(title: String): HttpResponse {
+    suspend fun addEvent(title: String, userName: String): HttpResponse {
         return apiClient.post(addEventEndpoint) {
             parameter("title", title)
+            parameter("userName", userName)
         }
     }
 
-    suspend fun getVisitors(eventId: Long): HttpResponse {
-        return apiClient.get(getVisitorsEndpoint) {
+    suspend fun getEvents(userName: String): List<Event> {
+        val response = apiClient.get(getEventsEndpoint) {
+            parameter("userName", userName)
+        }
+        return response.body()
+    }
+
+    suspend fun addEventAdministrator(eventId: Long, userName: String): HttpResponse {
+        return apiClient.post(addEventAdministratorEndpoint) {
+            parameter("eventId", eventId)
+            parameter("userName", userName)
+        }
+    }
+
+    suspend fun getVisitors(eventId: Long): List<EventVisitor> {
+        val response = apiClient.get(getVisitorsEndpoint) {
             parameter("eventId", eventId)
         }
+        return response.body()
     }
 
     suspend fun addVisitor(eventId: Long, fullName: String): HttpResponse {
@@ -43,5 +77,13 @@ class ApiClient(
             parameter("eventId", eventId)
             parameter("fullName", fullName)
         }
+    }
+
+    suspend fun setVisitorStatus(visitorId: Long, visitorStatus: EventVisitor.VisitStatus): String {
+        val response = apiClient.get(setVisitorStatus) {
+            parameter("visitorId", visitorId)
+            parameter("visitorStatus", visitorStatus)
+        }
+        return response.body<TextResponse>().message
     }
 }

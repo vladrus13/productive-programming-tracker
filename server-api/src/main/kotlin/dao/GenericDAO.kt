@@ -10,6 +10,13 @@ interface GenericDAO<E> {
     suspend fun findById(id: Long): E?
 
     /**
+     * Read entities with curtain [ids].
+     *
+     * @return entities with given [ids] or empty list
+     */
+    suspend fun findByIds(ids: List<Long>): List<E>
+
+    /**
      * Upsert operation for [entity].
      *
      * @return [entity] id if upsert operation succeed, null otherwise
