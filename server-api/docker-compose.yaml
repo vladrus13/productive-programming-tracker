@@ -1,0 +1,29 @@
+version: "3.7"
+services:
+  my-sql:
+    container_name: my-sql
+    env_file:
+      - "src/main/resources/database.properties"
+    ports:
+      - "3306:3306"
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: ${username}
+      MYSQL_PASSWORD: ${password}
+      MYSQL_DATABASE: ${name}
+    volumes:
+      - ./my-sql-data:/var/lib/mysql
+  server-api:
+    container_name: server-api
+    image: gradle:7.2-jdk17
+    depends_on:
+      - my-sql
+    ports:
+      - "8080:8080"
+    working_dir:
+      /app
+    volumes:
+      - ./:/app
+    command: "./gradlew run"
