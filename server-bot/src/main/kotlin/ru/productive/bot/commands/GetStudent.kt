@@ -2,11 +2,11 @@ package ru.productive.bot.commands
 
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.message
-import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.Message
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import kotlinx.coroutines.runBlocking
 import ru.productive.bot.botLogger
+import ru.productive.bot.replyToMessage
 import ru.productive.database.MockDatabase
 import ru.productive.utils.LevenshteinDistance
 import ru.productive.utils.LoggerUtils.Companion.addAnswer
@@ -27,8 +27,8 @@ fun Dispatcher.getStudent() {
         .take(5)
         .joinToString(separator = "\n")
       botLogger.addAnswer("addEvent", message, text)
-      bot.sendMessage(
-        ChatId.fromId(this@message.message.chat.id),
+      bot.replyToMessage(
+        message,
         text = text
       )
     }

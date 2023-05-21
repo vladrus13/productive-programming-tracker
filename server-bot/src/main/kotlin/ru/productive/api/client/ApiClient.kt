@@ -9,7 +9,6 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.ContentType.Application.Json
 import kotlinx.serialization.json.Json
 import model.TextResponse
 import model.entity.Event
@@ -55,7 +54,7 @@ class ApiClient(
         val response = apiClient.get(getEventsEndpoint) {
             parameter("userName", userName)
         }
-        return response.body()
+        return getResponseBody(response)
     }
 
     suspend fun addEventAdministrator(eventId: Long, userName: String): HttpResponse {
@@ -69,7 +68,7 @@ class ApiClient(
         val response = apiClient.get(getVisitorsEndpoint) {
             parameter("eventId", eventId)
         }
-        return response.body()
+        return getResponseBody(response)
     }
 
     suspend fun addVisitor(eventId: Long, fullName: String): HttpResponse {
@@ -85,5 +84,17 @@ class ApiClient(
             parameter("visitorStatus", visitorStatus)
         }
         return response.body<TextResponse>().message
+    }
+
+    private suspend inline fun <reified T> getResponseBody(response: HttpResponse): T {
+        if (response.status == HttpStatusCode.OK) {
+            return response.body()
+        } else {
+            throw BadResponseStatusException(response.body())
+        }
+    }
+
+    class BadResponseStatusException(val response: TextResponse) :
+        Exception("Bad Response status: ${response.message}") {
     }
 }
