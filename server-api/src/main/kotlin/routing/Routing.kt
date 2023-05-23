@@ -13,7 +13,6 @@ import model.entity.Event
 import model.entity.EventVisitor
 import model.TextResponse
 import model.entity.EventAdministrator
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.instance
 import org.kodein.di.ktor.closestDI
 
@@ -29,11 +28,8 @@ fun Application.configureRouting() {
             get("{id?}") {
                 call.log()
 
-                val id = call.parameters["id"]?.toLong() ?: return@get call.respondJSONText(
-                    "Missing id",
-                    HttpStatusCode.BadRequest
-                )
-                val event = eventDAO.findById(id) ?: return@get call.respondJSONText(
+                val id = call.extractParameter("id")?.toLong() ?: return@get
+                val event = eventDAO.findById(id) ?: return@get call.respondJsonText(
                     "No event with id $id",
                     HttpStatusCode.NotFound
                 )
@@ -43,8 +39,7 @@ fun Application.configureRouting() {
             get("/all") {
                 call.log()
 
-                val userName = call.parameters["userName"] ?: return@get call.respondJSONText(
-                    "Missing owner", HttpStatusCode.BadRequest)
+                val userName = call.extractParameter("userName") ?: return@get
 
                 val eventIds = eventAdministratorsDAO.findAllByUserName(userName).map { admin -> admin.eventId }
                 val events = eventDAO.findByIds(eventIds)
@@ -56,7 +51,7 @@ fun Application.configureRouting() {
                 call.log()
 
                 val event = call.receive<Event>()
-                val id = eventDAO.upsert(event) ?: return@post call.respondJSONText(
+                val id = eventDAO.upsert(event) ?: return@post call.respondJsonText(
                     "Nonexistent id ${event.id}",
                     HttpStatusCode.BadRequest
                 )
@@ -66,32 +61,27 @@ fun Application.configureRouting() {
             post("/add") {
                 call.log()
 
-                val title = call.parameters["title"] ?: return@post call.respondJSONText(
-                    "Missing title", HttpStatusCode.BadRequest)
-                val ownerUserName = call.parameters["userName"] ?: return@post call.respondJSONText(
-                    "Missing owner", HttpStatusCode.BadRequest)
+                val title = call.extractParameter("title") ?: return@post
+                val ownerUserName = call.extractParameter("userName") ?: return@post
 
                 val eventId = DatabaseFactory.dbQuery {
                     val eventId = eventDAO.upsert(Event(null, title))!!
                     eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, ownerUserName, EventAdministrator.Role.O))!!
                     eventId
                 }
-                return@post call.respondJSONText("Event is created with id $eventId", HttpStatusCode.OK)
+                call.respondJsonText("Event is created with id $eventId", HttpStatusCode.OK)
             }
 
             delete("{id?}") {
                 call.log()
 
-                val id = call.parameters["id"]?.toLong() ?: return@delete call.respondJSONText(
-                    "Missing id",
-                    HttpStatusCode.BadRequest
-                )
+                val id = call.extractParameter("id")?.toLong() ?: return@delete
                 if (eventDAO.delete(id)) {
                     call.response.status(HttpStatusCode.Accepted)
                 } else {
-                    return@delete call.respondText(
+                    return@delete call.respondJsonText(
                         "No event with id $id",
-                        status = HttpStatusCode.NotFound
+                        HttpStatusCode.NotFound
                     )
                 }
             }
@@ -102,13 +92,11 @@ fun Application.configureRouting() {
             post("/add") {
                 call.log()
 
-                val parameters = call.parameters
-
-                val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
-                val userName: String = parameters["userName"] ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val eventId: Long = call.extractParameter("eventId")?.toLong() ?: return@post
+                val userName: String = call.extractParameter("userName") ?: return@post
 
                 val adminId = eventAdministratorsDAO.upsert(EventAdministrator(null, eventId, userName, EventAdministrator.Role.A))
-                return@post call.respondJSONText("Administrator is added with id=$adminId", HttpStatusCode.OK)
+                call.respondJsonText("Administrator is added with id=$adminId", HttpStatusCode.OK)
             }
 
         }
@@ -118,7 +106,7 @@ fun Application.configureRouting() {
             get {
                 call.log()
 
-                val eventId: Long = call.parameters["eventId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val eventId: Long = call.extractParameter("eventId")?.toLong() ?: return@get
                 val visitors = eventVisitorsDAO.findAllByEventId(eventId)
 
                 call.respond(visitors)
@@ -127,34 +115,38 @@ fun Application.configureRouting() {
             get("/set-status") {
                 call.log()
 
-                val visitorId: Long = call.parameters["visitorId"]?.toLong() ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
-                val rawStatus = call.parameters["visitorStatus"] ?: return@get call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val visitorId: Long = call.extractParameter("visitorId")?.toLong() ?: return@get
+                val rawStatus = call.extractParameter("visitorStatus") ?: return@get
                 val status = EventVisitor.VisitStatus.valueOf(rawStatus)
 
                 if (eventVisitorsDAO.updateVisitStatus(visitorId, status)) {
-                    call.respondJSONText("Update successfully", HttpStatusCode.OK)
+                    call.respondJsonText("Update successfully", HttpStatusCode.OK)
                 } else {
-                    call.respondJSONText("No entity has been updated", HttpStatusCode.BadRequest)
+                    call.respondJsonText("No entity has been updated", HttpStatusCode.BadRequest)
                 }
             }
 
             post("/add") {
                 call.log()
 
-                val parameters = call.parameters
-
-                val eventId: Long = parameters["eventId"]?.toLong() ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
-                val fullName: String = parameters["fullName"] ?: return@post call.respondJSONText("E", HttpStatusCode.BadRequest)
+                val eventId: Long = call.extractParameter("eventId")?.toLong() ?: return@post
+                val fullName: String = call.extractParameter("fullName") ?: return@post
 
                 val visitorId = eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.R))
-                return@post call.respondJSONText("Visitor is registered with id=$visitorId", HttpStatusCode.OK)
+                call.respondJsonText("Visitor is registered with id=$visitorId", HttpStatusCode.OK)
             }
         }
     }
 }
 
-private suspend fun ApplicationCall.respondJSONText(message: String, statusCode: HttpStatusCode) {
-    return this.respond(statusCode, TextResponse(statusCode.value, message))
+private suspend fun ApplicationCall.respondJsonText(message: String, statusCode: HttpStatusCode) {
+    return respond(statusCode, TextResponse(statusCode.value, message))
+}
+
+private suspend fun ApplicationCall.extractParameter(parameterName: String): String? {
+    return parameters[parameterName].also {
+        it ?: respondJsonText("Missing parameter '$parameterName'.",  HttpStatusCode.BadRequest)
+    }
 }
 
 private fun ApplicationCall.log() {

@@ -3,7 +3,6 @@ package ru.productive.bot.commands
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.handlers.CommandHandlerEnvironment
-import com.github.kotlintelegrambot.entities.ChatId
 import com.github.kotlintelegrambot.entities.ParseMode
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
@@ -13,6 +12,7 @@ import ru.productive.bot.botLogger
 import ru.productive.bot.commands.parser.parseAddEventVisitorArguments
 import ru.productive.bot.commands.parser.parseGetEventVisitorEventId
 import ru.productive.bot.commands.parser.parseIdArg
+import ru.productive.bot.replyToMessage
 import ru.productive.utils.LoggerUtils.Companion.addAnswer
 import ru.productive.utils.LoggerUtils.Companion.addFailAnswer
 import ru.productive.utils.LoggerUtils.Companion.addUserMessage
@@ -23,25 +23,29 @@ fun Dispatcher.getEventVisitors(apiClient: ApiClient) {
             botLogger.addUserMessage("getEventVisitors", message)
             parseGetEventVisitorEventId(message.text)
                 .onSuccess { eventId ->
-                    val visitors = apiClient.getVisitors(eventId)
+                    val withEventHeader = try {
+                        val visitors = apiClient.getVisitors(eventId)
 
-                    val visitorsText = visitors.joinToString(separator = "\n") { visitor ->
-                        val statusEmoji = when (visitor.visitStatus) {
-                            EventVisitor.VisitStatus.R -> "\uD83D\uDFE1"
-                            EventVisitor.VisitStatus.M -> "\uD83D\uDD34"
-                            EventVisitor.VisitStatus.V -> "\uD83D\uDFE2"
+                        val visitorsText = visitors.joinToString(separator = "\n") { visitor ->
+                            val statusEmoji = when (visitor.visitStatus) {
+                                EventVisitor.VisitStatus.R -> "\uD83D\uDFE1"
+                                EventVisitor.VisitStatus.M -> "\uD83D\uDD34"
+                                EventVisitor.VisitStatus.V -> "\uD83D\uDFE2"
+                            }
+                            "$statusEmoji _${visitor.fullName}_ with id ${visitor.id}"
                         }
-                        "$statusEmoji _${visitor.fullName}_ with id ${visitor.id}"
+                        "Visitors for event with id \\= $eventId:\n$visitorsText".also {
+                            botLogger.addAnswer("getEventVisitors", message, it)
+                        }
+                    } catch (e: ApiClient.BadResponseStatusException) {
+                        e.response.message.also { botLogger.addFailAnswer("getEventVisitors", message, it) }
                     }
-                    val withEventHeader = "Visitors for event with id \\= $eventId:\n$visitorsText"
 
-                    botLogger.fine("Answer to ${message.from?.id}: $withEventHeader")
-
-                    bot.sendMessage(ChatId.fromId(message.chat.id), text = withEventHeader, parseMode = ParseMode.MARKDOWN_V2)
+                    bot.replyToMessage(message, text = withEventHeader, parseMode = ParseMode.MARKDOWN_V2)
                 }
                 .onFailure { e ->
-                    botLogger.addFailAnswer("addEvent", message, e.stackTrace.toString())
-                    bot.sendMessage(ChatId.fromId(message.chat.id), text = e.message ?: "Error")
+                    botLogger.addFailAnswer("getEventVisitors", message, e.stackTrace.toString())
+                    bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }
     }
@@ -57,19 +61,21 @@ fun Dispatcher.addEventVisitor(apiClient: ApiClient) {
                     val response: HttpResponse = apiClient.addVisitor(eventId, fullName)
                     val textResponse = response.bodyAsText()
                     botLogger.addAnswer("addEventVisitors", message, textResponse)
-                    bot.sendMessage(ChatId.fromId(message.chat.id), text = textResponse)
+                    bot.replyToMessage(message, text = textResponse)
                 }
                 .onFailure { e ->
                     botLogger.addFailAnswer("addEventVisitors", message, e.stackTrace.toString())
-                    bot.sendMessage(ChatId.fromId(message.chat.id), text = e.message ?: "Error")
+                    bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }
     }
 }
 
-fun CommandHandlerEnvironment.setVisitorStatus(cmdName: String,
-                                               apiClient: ApiClient,
-                                               visitorStatus: EventVisitor.VisitStatus) {
+fun CommandHandlerEnvironment.setVisitorStatus(
+    cmdName: String,
+    apiClient: ApiClient,
+    visitorStatus: EventVisitor.VisitStatus
+) {
     runBlocking {
         botLogger.addUserMessage(cmdName, message)
         parseIdArg(message.text)
@@ -78,11 +84,11 @@ fun CommandHandlerEnvironment.setVisitorStatus(cmdName: String,
 
                 botLogger.addAnswer(cmdName, message, responseText)
 
-                bot.sendMessage(ChatId.fromId(message.chat.id), text = responseText)
+                bot.replyToMessage(message, text = responseText)
             }
             .onFailure { e ->
                 botLogger.addFailAnswer(cmdName, message, e.stackTrace.toString())
-                bot.sendMessage(ChatId.fromId(message.chat.id), text = e.message ?: "Error")
+                bot.replyToMessage(message, text = e.message ?: "Error")
             }
     }
 }
