@@ -72,17 +72,27 @@ fun Application.configureRouting() {
                 call.respondJsonText("Event is created with id $eventId", HttpStatusCode.OK)
             }
 
-            delete("{id?}") {
+            delete("/delete") {
                 call.log()
 
-                val id = call.extractParameter("id")?.toLong() ?: return@delete
-                if (eventDAO.delete(id)) {
-                    call.response.status(HttpStatusCode.Accepted)
-                } else {
-                    return@delete call.respondJsonText(
-                        "No event with id $id",
-                        HttpStatusCode.NotFound
-                    )
+                val eventId = call.extractParameter("eventId")?.toLong() ?: return@delete
+                val ownerUserName = call.extractParameter("userName") ?: return@delete
+
+                return@delete DatabaseFactory.dbQuery {
+                    if (!eventAdministratorsDAO.confirmOwnershipByEventIdAndUserName(eventId, ownerUserName)) {
+                        call.respondJsonText(
+                            "User is not an owner of event with id $eventId",
+                            HttpStatusCode.Forbidden
+                        )
+                    }
+                    if (eventDAO.delete(eventId)) {
+                        call.response.status(HttpStatusCode.Accepted)
+                    } else {
+                        call.respondJsonText(
+                            "No event with id $eventId",
+                            HttpStatusCode.NotFound
+                        )
+                    }
                 }
             }
         }
