@@ -23,7 +23,7 @@ fun Dispatcher.addEventAdministrator(apiClient: ApiClient) {
                     botLogger.addAnswer("addEvent", message, textResponse)
                     bot.replyToMessage(message, text = textResponse)
                 }.onFailure { e ->
-                    botLogger.addFailAnswer("addEvent", message, e.stackTrace.toString())
+                    botLogger.addFailAnswer("addEvent", message, e.stackTrace.joinToString(separator = "\n"))
                     bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }
