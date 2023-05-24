@@ -10,6 +10,9 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -39,6 +42,15 @@ object YandexToken {
         install(Logging) {
             level = LogLevel.INFO
         }
+    }
+
+    suspend fun <T> PipelineContext<Unit, ApplicationCall>.withSendTime(
+        invoked : suspend PipelineContext<Unit, ApplicationCall>.() -> T
+    ): T {
+        val start = System.currentTimeMillis()
+        val result = invoked()
+        sendMonitoringEvent(call.request.path(), (System.currentTimeMillis() - start).toDouble())
+        return result
     }
 
     suspend fun sendMonitoringEvent(label: String, value: Double) {
