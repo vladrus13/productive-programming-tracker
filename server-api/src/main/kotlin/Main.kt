@@ -14,9 +14,6 @@ fun main(args: Array<String>) {
         runBlocking {
             YandexToken.enableMetrics()
         }
-        runBlocking {
-            YandexToken.sendMonitoringEvent("temperature", 16.0)
-        }
     }
     embeddedServer(Netty, port = 8080, module = Application::module).start(true)
 }
