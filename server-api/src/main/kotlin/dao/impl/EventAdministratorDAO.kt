@@ -3,6 +3,7 @@ package dao.impl
 import dao.DatabaseFactory
 import model.entity.EventAdministrator
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 
 class EventAdministratorDAO : AbstractGenericDAO<EventAdministrator, EventAdministrators>(
@@ -13,6 +14,14 @@ class EventAdministratorDAO : AbstractGenericDAO<EventAdministrator, EventAdmini
         EventAdministrators
             .select { EventAdministrators.userName eq userName }
             .map(EventAdministrator::fromResultRow)
+    }
+
+    suspend fun confirmOwnershipByEventIdAndUserName(eventId: Long, userName: String): Boolean = DatabaseFactory.dbQuery {
+        EventAdministrators
+            .select { EventAdministrators.eventId eq eventId and
+                    (EventAdministrators.userName eq userName) and
+                    (EventAdministrators.role eq EventAdministrator.Role.O) }
+            .empty().not()
     }
 }
 
