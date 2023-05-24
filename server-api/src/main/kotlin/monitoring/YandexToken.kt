@@ -17,6 +17,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.*
+import java.util.logging.Logger
+
+val logger = Logger.getLogger(YandexToken.javaClass.name)
 
 object YandexToken {
 
@@ -71,10 +74,12 @@ object YandexToken {
             setBody(node.toPrettyString())
         }
         if (!answer.status.isSuccess()) {
+            logger.severe("HTTP request is not success. Please, check your internet connection")
             throw IllegalStateException("HTTP request is not success. Please, check your internet connection")
         }
         val answerJson = objectMapper.readTree(answer.bodyAsText())
         if (answerJson["errorMessage"] != null || answerJson["writtenMetricsCount"]?.asText()?.toIntOrNull() == null) {
+            logger.severe("Request to API was incorrect")
             throw IllegalStateException("Request to API was incorrect")
         }
     }
@@ -89,6 +94,7 @@ object YandexToken {
         ) }.getOrNull()
         if (help?.resultCode != 0) {
             // TODO we can provide yandex cloud metrics install
+            logger.severe("You should install Yandex Cloud CLI for this action. Please, see: https://cloud.yandex.ru/docs/cli/quickstart#install")
             throw IllegalStateException("You should install Yandex Cloud CLI for this action. Please, see: https://cloud.yandex.ru/docs/cli/quickstart#install")
         }
     }
@@ -100,6 +106,7 @@ object YandexToken {
             stderr = Redirect.SILENT
         ) }.getOrNull()
         if (getTokenProcess?.resultCode != 0) {
+            logger.severe(createErrorYCMessage("yc iam create-token"))
             throw IllegalStateException(createErrorYCMessage("yc iam create-token"))
         } else {
             return getTokenProcess.output[0].trim()
@@ -113,6 +120,7 @@ object YandexToken {
             stderr = Redirect.SILENT
         ) }.getOrNull()
         if (getFoldersProcess?.resultCode != 0) {
+            logger.severe(createErrorYCMessage("yc resource-manager folder list --format=json"))
             throw IllegalStateException(createErrorYCMessage("yc resource-manager folder list --format=json"))
         } else {
             val output = getFoldersProcess.output.joinToString(separator = "\n")
