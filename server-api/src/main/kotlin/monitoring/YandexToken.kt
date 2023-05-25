@@ -16,6 +16,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import routing.logMethodAndUri
 import java.util.*
 import java.util.logging.Logger
 
@@ -54,6 +55,13 @@ object YandexToken {
         val result = invoked()
         sendMonitoringEvent(call.request.path(), (System.currentTimeMillis() - start).toDouble())
         return result
+    }
+
+    suspend fun <T> PipelineContext<Unit, ApplicationCall>.withSendTimeWithLog(
+        invoked: suspend PipelineContext<Unit, ApplicationCall>.() -> T
+    ) : T = withSendTime {
+        call.logMethodAndUri()
+        invoked()
     }
 
     suspend fun sendMonitoringEvent(label: String, value: Double) {
