@@ -44,7 +44,7 @@ fun Dispatcher.getEventVisitors(apiClient: ApiClient) {
                     bot.replyToMessage(message, text = withEventHeader, parseMode = ParseMode.MARKDOWN_V2)
                 }
                 .onFailure { e ->
-                    botLogger.addFailAnswer("getEventVisitors", message, e.stackTrace.toString())
+                    botLogger.addFailAnswer("getEventVisitors", message, e.stackTrace.joinToString(separator = "\n"))
                     bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }
@@ -64,7 +64,7 @@ fun Dispatcher.addEventVisitor(apiClient: ApiClient) {
                     bot.replyToMessage(message, text = textResponse)
                 }
                 .onFailure { e ->
-                    botLogger.addFailAnswer("addEventVisitors", message, e.stackTrace.toString())
+                    botLogger.addFailAnswer("addEventVisitors", message, e.stackTrace.joinToString(separator = "\n"))
                     bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }
@@ -87,7 +87,7 @@ fun CommandHandlerEnvironment.setVisitorStatus(
                 bot.replyToMessage(message, text = responseText)
             }
             .onFailure { e ->
-                botLogger.addFailAnswer(cmdName, message, e.stackTrace.toString())
+                botLogger.addFailAnswer(cmdName, message, e.stackTrace.joinToString(separator = "\n"))
                 bot.replyToMessage(message, text = e.message ?: "Error")
             }
     }
