@@ -4,8 +4,10 @@ import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.dispatcher.handlers.CommandHandlerEnvironment
 import com.github.kotlintelegrambot.entities.ParseMode
+import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
+import model.TextResponse
 import model.entity.EventVisitor
 import ru.productive.api.client.ApiClient
 import ru.productive.bot.botLogger
@@ -55,16 +57,22 @@ fun Dispatcher.addEventVisitor(apiClient: ApiClient) {
 
     command("addEventVisitor") {
         runBlocking {
-            botLogger.addUserMessage("addEventVisitors", message)
+            botLogger.addUserMessage("addEventVisitor", message)
             parseAddEventVisitorArguments(message.text)
                 .onSuccess { (eventId, fullName) ->
                     val response: HttpResponse = apiClient.addVisitor(eventId, fullName)
-                    val textResponse = response.bodyAsText()
-                    botLogger.addAnswer("addEventVisitors", message, textResponse)
+                    val textResponse = try {
+                        response.body<TextResponse>().message
+                    } catch (
+                        e: NoTransformationFoundException
+                    ) {
+                        response.bodyAsText()
+                    }
+                    botLogger.addAnswer("addEventVisitor", message, textResponse)
                     bot.replyToMessage(message, text = textResponse)
                 }
                 .onFailure { e ->
-                    botLogger.addFailAnswer("addEventVisitors", message, e.stackTrace.joinToString(separator = "\n"))
+                    botLogger.addFailAnswer("addEventVisitor", message, e.stackTrace.joinToString(separator = "\n"))
                     bot.replyToMessage(message, text = e.message ?: "Error")
                 }
         }

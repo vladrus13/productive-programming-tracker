@@ -118,7 +118,7 @@ fun Application.configureRouting() {
                             EventAdministrator.Role.A
                         )
                     )
-                    call.respondJsonText("Administrator is added with id=$adminId", HttpStatusCode.OK)
+                    call.respondJsonText("Administrator is added with id $adminId", HttpStatusCode.OK)
                 }
             }
 
@@ -159,7 +159,7 @@ fun Application.configureRouting() {
 
                     val visitorId =
                         eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.R))
-                    call.respondJsonText("Visitor is registered with id=$visitorId", HttpStatusCode.OK)
+                    call.respondJsonText("Visitor is registered with id $visitorId", HttpStatusCode.OK)
                 }
             }
         }
