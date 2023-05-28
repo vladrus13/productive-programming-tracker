@@ -2,7 +2,6 @@ package ru.productive.bot.commands
 
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
-import com.github.kotlintelegrambot.entities.ParseMode
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
@@ -47,12 +46,12 @@ fun Dispatcher.getEvents(apiClient: ApiClient) {
                 val events = apiClient.getEvents(message.chat.username!!)
                 botLogger.addAnswer("getEvents", message, "${events.size} Events")
                 events.joinToString(separator = "\n") { event ->
-                    "Event _${event.title}_ with id ${event.id};"
+                    "Event '${event.title}' with id ${event.id};"
                 }
             } catch (e: ApiClient.BadResponseStatusException) {
                 e.response.message.also { botLogger.addFailAnswer("getEvents", message, it) }
             }
-            bot.replyToMessage(message, text = resultText, parseMode = ParseMode.MARKDOWN_V2)
+            bot.replyToMessage(message, text = resultText)
         }
     }
 }
