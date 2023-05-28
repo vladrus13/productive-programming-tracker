@@ -20,7 +20,7 @@ import ru.productive.utils.LoggerUtils.Companion.addFailAnswer
 import ru.productive.utils.LoggerUtils.Companion.addUserMessage
 
 fun Dispatcher.getEventVisitors(apiClient: ApiClient) {
-    command("getEventVisitors") {
+    command("geteventvisitors") {
         runBlocking {
             botLogger.addUserMessage("getEventVisitors", message)
             parseGetEventVisitorEventId(message.text)
@@ -55,7 +55,7 @@ fun Dispatcher.getEventVisitors(apiClient: ApiClient) {
 
 fun Dispatcher.addEventVisitor(apiClient: ApiClient) {
 
-    command("addEventVisitor") {
+    command("addeventvisitor") {
         runBlocking {
             botLogger.addUserMessage("addEventVisitor", message)
             parseAddEventVisitorArguments(message.text)
@@ -103,14 +103,14 @@ fun CommandHandlerEnvironment.setVisitorStatus(
 
 fun Dispatcher.markAsMissed(apiClient: ApiClient) {
 
-    command("markAsMissed") {
+    command("markasmissed") {
         this.setVisitorStatus("markAsMissed", apiClient, EventVisitor.VisitStatus.M)
     }
 }
 
 fun Dispatcher.markAsVisited(apiClient: ApiClient) {
 
-    command("markAsVisited") {
+    command("markasvisited") {
         this.setVisitorStatus("markAsVisited", apiClient, EventVisitor.VisitStatus.V)
     }
 }

@@ -15,7 +15,7 @@ import ru.productive.utils.LoggerUtils.Companion.addFailAnswer
 import ru.productive.utils.LoggerUtils.Companion.addUserMessage
 
 fun Dispatcher.addEvent(apiClient: ApiClient) {
-    command("addEvent") {
+    command("addevent") {
         runBlocking {
             botLogger.addUserMessage("addEvent", message)
             parseAddEventTitle(message.text)
@@ -39,7 +39,7 @@ fun Dispatcher.addEvent(apiClient: ApiClient) {
 }
 
 fun Dispatcher.getEvents(apiClient: ApiClient) {
-    command("getEvents") {
+    command("getevents") {
         runBlocking {
             botLogger.addUserMessage("getEvents", message)
             val resultText = try {

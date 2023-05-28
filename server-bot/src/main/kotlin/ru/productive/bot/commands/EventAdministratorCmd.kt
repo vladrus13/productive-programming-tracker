@@ -15,7 +15,7 @@ import ru.productive.utils.LoggerUtils.Companion.addFailAnswer
 import ru.productive.utils.LoggerUtils.Companion.addUserMessage
 
 fun Dispatcher.addEventAdministrator(apiClient: ApiClient) {
-    command("addEventAdministrator") {
+    command("addeventadministrator") {
         runBlocking {
             botLogger.addUserMessage("addEventAdministrator", message)
             parseEventAdministratorArguments(message)
