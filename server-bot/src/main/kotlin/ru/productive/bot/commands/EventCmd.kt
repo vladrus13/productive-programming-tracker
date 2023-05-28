@@ -47,7 +47,7 @@ fun Dispatcher.getEvents(apiClient: ApiClient) {
                 botLogger.addAnswer("getEvents", message, "${events.size} Events")
                 events.joinToString(separator = "\n") { event ->
                     "Event '${event.title}' with id ${event.id};"
-                }
+                }.ifBlank { "No events" }
             } catch (e: ApiClient.BadResponseStatusException) {
                 e.response.message.also { botLogger.addFailAnswer("getEvents", message, it) }
             }
