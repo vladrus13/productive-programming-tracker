@@ -3,8 +3,10 @@ package ru.productive.bot.commands
 import com.github.kotlintelegrambot.dispatcher.Dispatcher
 import com.github.kotlintelegrambot.dispatcher.command
 import com.github.kotlintelegrambot.entities.ParseMode
+import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
+import model.TextResponse
 import ru.productive.api.client.ApiClient
 import ru.productive.bot.botLogger
 import ru.productive.bot.commands.parser.parseAddEventTitle
@@ -20,7 +22,13 @@ fun Dispatcher.addEvent(apiClient: ApiClient) {
             parseAddEventTitle(message.text)
                 .onSuccess { title ->
                     val response: HttpResponse = apiClient.addEvent(title, message.chat.username!!)
-                    val textResponse = response.bodyAsText()
+                    val textResponse = try {
+                        response.body<TextResponse>().message
+                    } catch (
+                        e: NoTransformationFoundException
+                    ) {
+                        response.bodyAsText()
+                    }
                     botLogger.addAnswer("addEvent", message, textResponse)
                     bot.replyToMessage(message, text = textResponse)
                 }.onFailure { e ->

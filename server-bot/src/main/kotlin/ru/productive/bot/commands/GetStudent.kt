@@ -26,7 +26,7 @@ fun Dispatcher.getStudent() {
         .sortedBy { LevenshteinDistance.calculate(it.split(" "), student) }
         .take(5)
         .joinToString(separator = "\n")
-      botLogger.addAnswer("addEvent", message, text)
+      botLogger.addAnswer("getStudent", message, text)
       bot.replyToMessage(
         message,
         text = text

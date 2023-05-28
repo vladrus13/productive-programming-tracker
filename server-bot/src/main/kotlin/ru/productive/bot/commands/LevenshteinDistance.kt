@@ -27,7 +27,7 @@ fun Dispatcher.levenshteinDistance() {
       } else {
         "Please, enter valid names"
       }
-      botLogger.addAnswer("addEvent", message, text)
+      botLogger.addAnswer("levenshtein", message, text)
       bot.replyToMessage(
         message,
         text = text

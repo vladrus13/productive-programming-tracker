@@ -12,7 +12,7 @@ fun Dispatcher.ping() {
   command("ping") {
     runBlocking {
       botLogger.addUserMessage("ping", message)
-      botLogger.addAnswer("addEvent", message, "PONG!")
+      botLogger.addAnswer("ping", message, "PONG!")
       bot.replyToMessage(message, text = "PONG!")
     }
   }
