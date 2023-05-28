@@ -60,7 +60,7 @@ fun Dispatcher.addEventVisitor(apiClient: ApiClient) {
             botLogger.addUserMessage("addEventVisitor", message)
             parseAddEventVisitorArguments(message.text)
                 .onSuccess { (eventId, fullName) ->
-                    val response: HttpResponse = apiClient.addVisitor(eventId, fullName)
+                    val response: HttpResponse = apiClient.addVisitor(eventId, fullName, message.chat.username!!)
                     val textResponse = try {
                         response.body<TextResponse>().message
                     } catch (

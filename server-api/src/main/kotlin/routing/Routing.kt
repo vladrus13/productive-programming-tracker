@@ -88,6 +88,7 @@ fun Application.configureRouting() {
                                 "User is not an owner of event with id $eventId",
                                 HttpStatusCode.Forbidden
                             )
+                            return@dbQuery
                         }
                         if (eventDAO.delete(eventId)) {
                             call.response.status(HttpStatusCode.Accepted)
@@ -141,6 +142,7 @@ fun Application.configureRouting() {
 
                     val visitorId: Long = call.extractParameter("visitorId")?.toLong() ?: return@withSendTimeWithLog
                     val rawStatus = call.extractParameter("visitorStatus") ?: return@withSendTimeWithLog
+
                     val status = EventVisitor.VisitStatus.valueOf(rawStatus)
 
                     if (eventVisitorsDAO.updateVisitStatus(visitorId, status)) {
@@ -156,6 +158,15 @@ fun Application.configureRouting() {
 
                     val eventId: Long = call.extractParameter("eventId")?.toLong() ?: return@withSendTimeWithLog
                     val fullName: String = call.extractParameter("fullName") ?: return@withSendTimeWithLog
+                    val ownerUserName: String = call.extractParameter("username") ?: return@withSendTimeWithLog
+
+                    if (!eventAdministratorsDAO.confirmOwnershipByEventIdAndUserName(eventId, ownerUserName)) {
+                        call.respondJsonText(
+                            "User is not an owner of event with id $eventId",
+                            HttpStatusCode.Forbidden
+                        )
+                        return@withSendTimeWithLog
+                    }
 
                     val visitorId =
                         eventVisitorsDAO.upsert(EventVisitor(null, eventId, fullName, EventVisitor.VisitStatus.R))
