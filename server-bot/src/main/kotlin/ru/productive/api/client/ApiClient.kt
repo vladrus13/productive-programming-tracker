@@ -71,10 +71,11 @@ class ApiClient(
         return getResponseBody(response)
     }
 
-    suspend fun addVisitor(eventId: Long, fullName: String): HttpResponse {
+    suspend fun addVisitor(eventId: Long, fullName: String, username: String): HttpResponse {
         return apiClient.post(addVisitorEndpoint) {
             parameter("eventId", eventId)
             parameter("fullName", fullName)
+            parameter("username", username)
         }
     }
 
